@@ -36,6 +36,7 @@ static int finishScreen = 0;
 static int _currentWallSelection = 8;
 static int _currentWallHighlighted = 8;
 static int _currentItemSelection = 1;
+static int _currentWallHeight = 1;
 static int cameraMode = CAMERA_FREE;
 static SFG_Level* level;
 static Camera3D camera = { 0 };
@@ -155,102 +156,43 @@ void ConsoleQuery(const char* query, char* responseBuffer, size_t size)
             strcpy_s(responseBuffer, MAX_SAVE_FILE_NAME, currentLevel);
         }
     }
-    else if (strncmp(inputString, "CEILCOL", 7) == 0) {
-        sprintf(responseBuffer, "Ceiling colour = %i", level->ceilingColor);
+    else if (strncmp(inputString, "CEILHEIGHT", 10) == 0) {
+        sprintf(responseBuffer, "Ceiling Height = %i", level->ceilingHeight);
     }
-    else if (strncmp(inputString, "FLOORCOL", 8) == 0) {
-        sprintf(responseBuffer, "Floor colour = %i", level->floorColor);
+    else if (strncmp(inputString, "CEIL", 10) == 0) {
+        sprintf(responseBuffer, "Ceiling Type = %i", level->ceilingType);
     }
-    else if (strncmp(inputString, "BACKGROUND", 10) == 0) {
-        sprintf(responseBuffer, "Background = %i", level->backgroundImage);
+    else if (strncmp(inputString, "FLOORTYPE", 9) == 0) {
+        sprintf(responseBuffer, "Floor type = %i", level->floorType);
     }
-    else if (strncmp(inputString, "SETCEILCOL", 10) == 0)
-    {
-        if (strnlen(inputString, 100) < 12)
-        {
-            strcpy(responseBuffer, "Please enter a value for ceil colour");
-        }
-        else
-        {
-            auto col = atoi(&inputString[11]);
-
-            if (col < 0) {
-                strcpy(responseBuffer, "Please enter a valid value");
-            }
-            else if (col > MAX_FLOOR_AND_CEIL_COLOUR)
-            {
-                char tooBigbuffer[40];
-                const char* maxSizeResponse = sprintf(tooBigbuffer, "Ceil colour must be equel to or below %i", MAX_FLOOR_AND_CEIL_COLOUR);
-                strcpy(responseBuffer, tooBigbuffer);
-            }
-            else {
-                level->ceilingColor = col;
-                RefreshMap(true);
-                sprintf(responseBuffer, "Ceiling colour updated to %i", col);
-            }
-        }
-    }
-    else if (strncmp(inputString, "SETFLOORCOL", 11) == 0)
-    {
-        if (strnlen(inputString, 100) < 13)
-        {
-            strcpy(responseBuffer, "Please enter a value for floor colour");
-        }
-        else
-        {
-            auto col = atoi(&inputString[11]);
-
-            if (col < 1) {
-                strcpy(responseBuffer, "Could not read floor colour value");
-            }
-            else if (col > MAX_FLOOR_AND_CEIL_COLOUR)
-            {
-                char tooBigbuffer[40];
-                const char* maxSizeResponse = sprintf(tooBigbuffer, "Floor colour must be equel to or below %i", MAX_FLOOR_AND_CEIL_COLOUR);
-                strcpy(responseBuffer, tooBigbuffer);
-            }            
-            else {
-                level->floorColor = col;
-                RefreshMap(true);
-                sprintf(responseBuffer, "FLoor colour updated to %i", col);
-            }
-        }
-    }
-    else if (strncmp(inputString, "SETBACKGROUND", 13) == 0)
+    
+    else if (strncmp(inputString, "SETCEILHEIGHT", 13) == 0)
     {
         if (strnlen(inputString, 100) < 15)
         {
-            strcpy(responseBuffer, "Please enter a value for background");
+            strcpy(responseBuffer, "Please enter a value for ceil height");
         }
         else
         {
-            char* endptr = NULL;
+            auto col = atoi(&inputString[14]);
 
-            auto bg = strtol(&inputString[14], &endptr, 14);
-
-            if (*endptr != '\0') {
-                strcpy(responseBuffer, "Could not read background value");
-            }
-            else if (bg > MAX_BACKGROUND_VALUE)
+            if (col < 0) 
             {
-                char tooBigbuffer[50];
-                const char* maxSizeResponse = sprintf(tooBigbuffer, "Background value must be equel to or below %i", MAX_BACKGROUND_VALUE);
+                strcpy(responseBuffer, "Please enter a valid value");
+            }
+           else if (col > MAX_CEIL_HEIGHT)
+            {
+                char tooBigbuffer[40];
+                const char* maxSizeResponse = sprintf(tooBigbuffer, "Ceil height must be equel to or below %i", MAX_CEIL_HEIGHT);
                 strcpy(responseBuffer, tooBigbuffer);
             }
-
-            else if (bg < 1)
-            {
-                char tooSmallbuffer[40];
-                const char* maxSizeResponse = sprintf(tooSmallbuffer, "Background value cannont be below 1");
-                strcpy(responseBuffer, tooSmallbuffer);
-            }
             else {
-                level->backgroundImage = bg;
+                level->ceilingHeight = col;
                 RefreshMap(true);
-                sprintf(responseBuffer, "Background colour updated to %i", bg);
+                sprintf(responseBuffer, "Ceiling height updated to %i", col);
             }
         }
-        }
+    }
     else if (strncmp(inputString, "SAVE", 4) == 0)
     {   
         char* spacePos = strstr(inputString, " ");
@@ -294,11 +236,6 @@ void ConsoleQuery(const char* query, char* responseBuffer, size_t size)
         UnloadEngineScreen();
         return;
     }
-    // TODO: do a decent job of adding help
-    /*else if (strncmp(inputString, "HELP", 4) == 0)
-    {
-        strcpy(responseBuffer, "\"Close\" - Close console; \"load\" + level name - load level; \"save\" + level name - save level; \"test\" - Test level; setLevelPack + level pack \n \"nuke\" - Clear level; \"quit\" - quit editor; \"setStepSize\" + int param - set the global step size");
-    }*/
     else if (strncmp(inputString, "NUKE", 4) == 0)
     {
         memset(level, 0, sizeof(SFG_Level));
@@ -358,52 +295,7 @@ void ConsoleQuery(const char* query, char* responseBuffer, size_t size)
             strcpy(responseBuffer, "No level pack has been set");
         }
     }
-    else if (strncmp(inputString, "STEPSIZE", 8) == 0)
-    {
-        if (level)
-        {
-            sprintf(responseBuffer,"Current step size =  %i", level->stepSize);
-        }
-        else
-        {
-            strcpy(responseBuffer, "Something went wrong: could not find level data");           
-        }
-    }
-    else if (strncmp(inputString, "SETSTEPSIZE", 11) == 0)
-    {        
-        if (strnlen(inputString, 100) < 13)
-        {            
-            strcpy(responseBuffer, "Please enter a value for step size");
-        }
-        else
-        {
-            char* endptr = NULL;
-
-            auto size = strtol(&inputString[12], &endptr, 13);
-
-            if (*endptr != '\0') {
-                strcpy(responseBuffer, "Could not read step size value");
-            }
-            else if (size > MAX_STEP_SIZE)
-            {
-                char tooBigbuffer[40];
-                const char* maxSizeResponse = sprintf(tooBigbuffer, "Step size must be equel to or below %i", MAX_STEP_SIZE);
-                strcpy(responseBuffer, tooBigbuffer);
-            }
-            else if (size < 1)
-            {
-                char tooSmallbuffer[40];
-                const char* maxSizeResponse = sprintf(tooSmallbuffer, "Step size cannont be below 1");
-                strcpy(responseBuffer, tooSmallbuffer);
-            }
-            else {
-                level->stepSize = size;
-                RefreshMap(true);
-                strcpy(responseBuffer, "Step size updated");
-            }
-            
-        }        
-    }
+    
     else if (strncmp(inputString, "TEST", 4) == 0)
     {    
 
@@ -439,69 +331,6 @@ void ConsoleQuery(const char* query, char* responseBuffer, size_t size)
              sprintf(exeLocation,"Ruyn.exe -p %s -w -d", levelPack);
         }
         
-
-        system(exeLocation);
-    }
-    else if (strncmp(inputString, "HDTEST", 6) == 0)
-    {
-
-#ifdef  DEBUG
-        strcpy(responseBuffer, "Map testing current disabled in debug");
-        return;
-#endif
-        if (IsWindowFullscreen)
-        {
-            SetWindowSize(WINDOW_WIDTH, WINDOW_HEIGHT);
-        }
-
-        char buffer[MAX_LEVEL_PACK_NAME + MAX_SAVE_FILE_NAME];
-        GetLevelFilePath(buffer, DEBUG_LEVEL);
-
-        if (SaveLevel(level, buffer))
-        {
-            TraceLog(LOG_INFO, "Level saved on test hd game");
-        }
-        else
-        {
-            TraceLog(LOG_ERROR, "Error saving level to file");
-        }
-
-        char exeLocation[MAX_LEVEL_PACK_NAME + 22];
-
-        if (levelPack == EMPTY)
-        {
-            sprintf(exeLocation, "RuynHd.exe LevelPack=original -windowed -resy=720 -resx=1280 debugLevel=level99");
-        }
-        else
-        {
-            sprintf(exeLocation, "RuynHd.exe LevelPack=%s -windowed -resy=720 -resx=1280 debugLevel=level99", levelPack);
-        }
-
-
-        system(exeLocation);
-        }
-    else if (strncmp(inputString, "PREVIEW", 7) == 0)
-    {
-
-#ifdef  DEBUG
-        strcpy(responseBuffer, "Map testing current disabled in debug");
-        return;
-#endif
-        if (IsWindowFullscreen)
-        {
-            SetWindowSize(WINDOW_WIDTH, WINDOW_HEIGHT);
-        }
-
-        char exeLocation[MAX_LEVEL_PACK_NAME + 20];
-
-        if (levelPack == EMPTY)
-        {
-            sprintf(exeLocation, "Ruyn.exe -w -d -t");
-        }
-        else
-        {
-            sprintf(exeLocation, "Ruyn.exe -p %s -w -d -t", levelPack);
-        }
 
         system(exeLocation);
     }
@@ -758,7 +587,7 @@ void SetSelectionBlockLocation(void)
             selectionLocation.mapArrayIndex = GetMapIndeFromPosition(selectionLocation.position);
             if (foundEntityType == Entity_Type_Wall)
             {
-                _currentWallHighlighted = level->mapArray[selectionLocation.mapArrayIndex];
+                //_currentWallHighlighted = level->blocks[selectionLocation.mapArrayIndex].;
                 if (IsMouseButtonPressed(MOUSE_BUTTON_LEFT))
                 {
                     if (_currentWallHighlighted > DOOR_MASK)
@@ -790,8 +619,8 @@ void SetSelectionBlockLocation(void)
             uint8_t row = 0;
 
             GetEntityPositionFromPosition(selectionLocation.position, &col, &row);
-            level->elements[_elementCount].coords[0] = col;
-            level->elements[_elementCount].coords[1] = row;
+            level->elements[_elementCount].position.x = col;
+            level->elements[_elementCount].position.y = row;
             level->elements[_elementCount].type = _currentItemSelection;
             RefreshMap(true);
             selectionLocation.itemIndex = _elementCount - 1;
@@ -799,8 +628,10 @@ void SetSelectionBlockLocation(void)
 
         if (foundEntityType != Entity_Type_Wall && IsMouseButtonDown(MOUSE_BUTTON_LEFT))
         {
-            level->mapArray[selectionLocation.mapArrayIndex] = _currentWallSelection;
-            RefreshMap(true);
+            level->blocks[selectionLocation.mapArrayIndex].blockType = _currentWallSelection;
+            level->blocks[selectionLocation.mapArrayIndex].height = _currentWallHeight;
+
+            RefreshMap(true);   
         }
 }
 
@@ -809,15 +640,15 @@ void RemoveElement(uint16_t i)
     while (i < MAX_ELEMENTS - 1 && level->elements[i].type > 0)
     {
         uint16_t next = i + 1;
-        level->elements[i].coords[0] = level->elements[next].coords[0];
-        level->elements[i].coords[1] = level->elements[next].coords[1];
+        level->elements[i].position.x = level->elements[next].position.x;
+        level->elements[i].position.y = level->elements[next].position.y;
         level->elements[i].type = level->elements[next].type;
         i++;
     };  
     // Reset the final element
     level->elements[i].type = 0;
-    level->elements[i].coords[0] = 0;
-    level->elements[i].coords[1] = 0;
+    level->elements[i].position.x = 0;
+    level->elements[i].position.y = 0;
 }
 
 int DoesPositionHaveElement(Vector3 location)
@@ -829,7 +660,7 @@ int DoesPositionHaveElement(Vector3 location)
     
     for (size_t i = 0; i < _elementCount; i++)
     {
-        if (level->elements[i].coords[0] == x && level->elements[i].coords[1] == y)
+        if (level->elements[i].position.x == x && level->elements[i].position.y == y)
         {
             return i;
         }
@@ -900,16 +731,16 @@ void InitElements(bool saveOnComplete)
         {
             float size = 1.f;
 
-            int mapArrayindex = GetMapArrayIndex(level->elements[i].coords[0], level->elements[i].coords[1]);
+            int mapArrayindex = GetMapArrayIndex(level->elements[i].position.x, level->elements[i].position.y);
 
-            uint8_t stepSize = GetMapArrayHeightFromIndex(level->mapArray[mapArrayindex], level->floorHeight, level->stepSize);
+            uint8_t stepSize = level->blocks[mapArrayindex].height;
 
             Texture t = GetTextureFromElementType(level->elements[i].type);
             float h = 0.25f * stepSize;
-            float x = level->elements[i].coords[0] + 0.5;
+            float x = level->elements[i].position.x + 0.5;
             
             float y = (size / 2) + h;
-            float z = level->elements[i].coords[1] + 0.5;
+            float z = level->elements[i].position.y + 0.5;
             Vector3 pos = (Vector3){ x - MAP_DIMENSION / 2,y ,z - MAP_DIMENSION / 2 };
             
             Vector3 elementSize = (Vector3){ 0.95f, 0.95f, 0.95f };
@@ -982,12 +813,11 @@ void InitWalls(bool saveOnComplete)
             col = 0;
         }
 
-        if (level->mapArray[i] > 0)
+        if (level->blocks[i].blockType > 0)
         {
-            uint8_t v = level->mapArray[i];
-            uint8_t height = GetMapArrayHeightFromIndex(level->mapArray[i], level->floorHeight, level->stepSize);            
-            uint8_t textureIndexRef = GetTetureIndex(level->mapArray[i]);
-            uint8_t textureIndex = level->textureIndices[textureIndexRef];
+            // uint8_t v = level->mapArray[i];
+            uint8_t height = level->blocks[i].height;
+            uint8_t textureIndex = 1;
 
             for (uint8_t k = 0; k < height; k++)
             {
@@ -1008,27 +838,17 @@ void InitWalls(bool saveOnComplete)
                 float y = 1.0f;
                 float z = (1.0f * row) - MAP_DIMENSION / 2;
 
-                bool isDoor = v >= DOOR_MASK;
+                bool isDoor = level->blocks->doorPosition > 0;
 
                 mapBlocks[_blockCount].isDoor = isDoor;
                 if (isDoor)
                 {
-                    if (k == level->doorLevitation * 4)
-                    {
-                        mapBlocks[_blockCount].position = (Vector3){ x + 0.5f, (k * BLOCK_HEIGHT) + drawHeight / 2, z + 0.5f };
-                        mapBlocks[_blockCount].texture = wallTextures[level->doorTextureIndex];
-                        
-                    }
-                    else
-                    {
-                        mapBlocks[_blockCount].position = (Vector3){ x + 0.5f, (k * BLOCK_HEIGHT) + drawHeight / 2, z + 0.5f };
-                        mapBlocks[_blockCount].texture = wallTextures[textureIndex];
-                    }
+                    
                 }
                 else
                 {
                     mapBlocks[_blockCount].position = (Vector3){ x + 0.5f, (k * BLOCK_HEIGHT) + drawHeight / 2, z + 0.5f };
-                    mapBlocks[_blockCount].texture = wallTextures[textureIndex];
+                    mapBlocks[_blockCount].texture = wallTextures[0];
                 }
 
                 mapBlocks[_blockCount].drawHeight = drawHeight;
@@ -1230,7 +1050,7 @@ void InitGameplayScreen(void)
     
     if (level)
     {
-        camera.position = (Vector3){ level->playerStart[0] - (MAP_DIMENSION / 2) , 1.0f, level->playerStart[1] - (MAP_DIMENSION / 2) };
+        camera.position = (Vector3){ level->playerStart.x - (MAP_DIMENSION / 2) , 1.0f, level->playerStart.y - (MAP_DIMENSION / 2) };
     }
 
     InitWalls(false);
@@ -1272,53 +1092,53 @@ void InitGameplayScreen(void)
   
 void UpdateFloorHeight(void)
 {
-    auto e = level->mapArray[selectionLocation.mapArrayIndex];
+    /*auto e = level->mapArray[selectionLocation.mapArrayIndex];
     uint8_t h = GetMapArrayHeightFromIndex(e, e == 0 ? 1 : level->floorHeight, level->stepSize);
-    _floorHeight = h;
+    _floorHeight = h;*/
 }
 
 void ScrollUpEntities(void)
 {
-    if (selectionLocation.entityType == Entity_Type_Wall)
-    {
-        bool isDoor = level->mapArray[selectionLocation.mapArrayIndex] > DOOR_MASK;
+   // if (selectionLocation.entityType == Entity_Type_Wall)
+   // {
+        //bool isDoor = level->mapArray[selectionLocation.mapArrayIndex] > DOOR_MASK;
 
-        _currentWallHighlighted--;
-        
+        //_currentWallHighlighted--;
+        //
 
-        if (isDoor)
-        {
-            if ((_currentWallHighlighted & ~DOOR_MASK) < 1)
-            {
-                _currentWallHighlighted = 7 | DOOR_MASK;
-            }
-            _currentWallSelection = (_currentWallHighlighted & ~DOOR_MASK) + 7;
-        }
-        else
-        {
-            if ((_currentWallHighlighted) % 7 == 0)
-            {
-                _currentWallHighlighted += 7;
-            }
-            _currentWallSelection = _currentWallHighlighted;
-        }
+        //if (isDoor)
+        //{
+        //    if ((_currentWallHighlighted & ~DOOR_MASK) < 1)
+        //    {
+        //        _currentWallHighlighted = 7 | DOOR_MASK;
+        //    }
+        //    _currentWallSelection = (_currentWallHighlighted & ~DOOR_MASK) + 7;
+        //}
+        //else
+        //{
+        //    if ((_currentWallHighlighted) % 7 == 0)
+        //    {
+        //        _currentWallHighlighted += 7;
+        //    }
+        //    _currentWallSelection = _currentWallHighlighted;
+        //}
 
-        level->mapArray[selectionLocation.mapArrayIndex] = _currentWallHighlighted;
-        RefreshMap(true);
-    }
-    else if (selectionLocation.entityType == Entity_Type_Item)
-    {
-        uint8_t t = _currentItemSelection;
-        uint8_t nextElement = GetPreviousElementType(t);
-        level->elements[selectionLocation.itemIndex].type = nextElement;
-        _currentItemSelection = nextElement;
-        RefreshMap(true);
-    }
+        //level->mapArray[selectionLocation.mapArrayIndex] = _currentWallHighlighted;
+        //RefreshMap(true);
+    //}
+    //else if (selectionLocation.entityType == Entity_Type_Item)
+    //{
+    //    uint8_t t = _currentItemSelection;
+    //    uint8_t nextElement = GetPreviousElementType(t);
+    //    level->elements[selectionLocation.itemIndex].type = nextElement;
+    //    _currentItemSelection = nextElement;
+    //    RefreshMap(true);
+    //}
 }
 
 void ScrollDownEntities(void)
 {
-    if (selectionLocation.entityType == Entity_Type_Wall)
+   /* if (selectionLocation.entityType == Entity_Type_Wall)
     {
         bool isDoor = level->mapArray[selectionLocation.mapArrayIndex] > DOOR_MASK;
 
@@ -1352,7 +1172,7 @@ void ScrollDownEntities(void)
         level->elements[selectionLocation.itemIndex].type = nextElement;
         _currentItemSelection = nextElement;
         RefreshMap(true);
-    }
+    }*/
 }
 
 int GetDoorIndexFromwall(int i)
@@ -1423,24 +1243,15 @@ void UpdateGameplayScreen(void)
             RefreshMap(false);            
         }
     }
-    if (IsKeyDown(KEY_LEFT_CONTROL) && IsKeyPressed(KEY_Y))
-    {
-        SFG_Level a = _levelHistory.history[_levelHistory.currentIndex + 1];
-        if (a.floorHeight > 0 && a.ceilHeight > 0)
-        {
-            _levelHistory.currentIndex++;
-            memcpy(level, &_levelHistory.history[_levelHistory.currentIndex], sizeof(SFG_Level));
-            RefreshMap(false);            
-        }
-    }
+    
 
     static bool isPlayerRotatingRight = false;
     if (IsKeyDown(KEY_F6))
     {
-        level->playerStart[2]++;
-        if (level->playerStart[2] >= 254)
+        level->playerStartRotation++;
+        if (level->playerStartRotation >= 254)
         {
-            level->playerStart[2] = 0;
+            level->playerStartRotation = 0;
         }
         isPlayerRotatingRight = true;
     }
@@ -1457,10 +1268,10 @@ void UpdateGameplayScreen(void)
     static bool isPlayerRotatingLeft = false;
     if (IsKeyDown(KEY_F5))
     {
-        level->playerStart[2]--;
-        if (level->playerStart[2] <= 0)
+        level->playerStartRotation--;
+        if (level->playerStartRotation <= 0)
         {
-            level->playerStart[2] = 255;
+            level->playerStartRotation = 255;
         }
         isPlayerRotatingLeft = true;
     }
@@ -1476,85 +1287,16 @@ void UpdateGameplayScreen(void)
 
     if (IsKeyPressed(KEY_ZERO))
     {
-        if (selectionLocation.entityType == Entity_Type_Wall && level->mapArray[selectionLocation.mapArrayIndex] > DOOR_MASK)
-        {
-            int index = DoesPositionHaveElement(selectionLocation.position);
-        
-            if (index >= 0)
-            {
-                RemoveElement(index);
-                RefreshMap(true);
-            }        
-        }
+
     }
 
     if (IsKeyPressed(KEY_ONE) || IsKeyPressed(KEY_TWO) || IsKeyPressed(KEY_THREE))
     {
-        if (selectionLocation.entityType == Entity_Type_Wall)
-        {        
-            if (level->mapArray[selectionLocation.mapArrayIndex] > DOOR_MASK)
-            {
-                uint8_t x = 0;
-                uint8_t y = 0;
-
-                GetEntityPositionFromPosition(selectionLocation.position, &x, &y);                
-                
-                int index = DoesPositionHaveElement(selectionLocation.position);                
-                bool incCounter = false;
-
-                if (index < 0)
-                {                
-                    index = _elementCount;
-                    incCounter = true;
-                }
-
-                level->elements[_elementCount].coords[0] = x;
-                level->elements[_elementCount].coords[1] = y;
-                
-                if (IsKeyPressed(KEY_ONE))
-                {
-                    level->elements[index].type = SFG_LEVEL_ELEMENT_LOCK0;
-                }
-                else if (IsKeyPressed(KEY_TWO))
-                {
-                    level->elements[index].type = SFG_LEVEL_ELEMENT_LOCK1;
-                }
-                else if (IsKeyPressed(KEY_THREE))
-                {
-                    level->elements[index].type = SFG_LEVEL_ELEMENT_LOCK2;
-                }
-                if (incCounter)
-                {                
-                    _elementCount++;
-                }
-
-                RefreshMap(true);
-            }
-        }
     }
     
     if (IsKeyPressed(KEY_T))
     {
-        if (selectionLocation.entityType == Entity_Type_Wall)
-        {
-            if (level->mapArray[selectionLocation.mapArrayIndex] < DOOR_MASK)
-            {                                
-                int index = level->mapArray[selectionLocation.mapArrayIndex];                
-                int m = GetDoorIndexFromwall(index);               
-                level->mapArray[selectionLocation.mapArrayIndex] = (index - m) | DOOR_MASK;
-            }
-            else
-            {
-                level->mapArray[selectionLocation.mapArrayIndex] = (level->mapArray[selectionLocation.mapArrayIndex] + 7) & (~DOOR_MASK);
-                int k = DoesPositionHaveElement(selectionLocation.position);
-                if(k >= 0)
-                {
-                    RemoveElement(k);
-                }
-            }
-            // _currentWallSelection = level->mapArray[selectionLocation.mapArrayIndex];
-            RefreshMap(true);
-        }
+
     }
 
     if (IsKeyPressed(KEY_P))
@@ -1566,8 +1308,8 @@ void UpdateGameplayScreen(void)
 
             GetEntityPositionFromPosition(selectionLocation.position, &col, &row);
 
-            level->playerStart[0] = col;
-            level->playerStart[1] = row;
+            level->playerStart.x = col;
+            level->playerStart.y = row;
             
             char startBuffer[100];
             sprintf(startBuffer, "Player start position set to X:%u, Y:%u", col, row);
@@ -1707,7 +1449,10 @@ void UpdateGameplayScreen(void)
     
     if (IsKeyDown(KEY_LEFT_SHIFT) && IsKeyPressed(KEY_PERIOD))
     {
-        level->floorHeight++;
+       
+      /*  
+       
+      level->floorHeight++;
         if (level->floorHeight > MAX_WALL_HEIGHT)
         {
             level->floorHeight = MIN_WALL_HEIGHT;
@@ -1716,44 +1461,28 @@ void UpdateGameplayScreen(void)
         if (level->ceilHeight < OUTSIDE_CEIL_VALUE)
         {
             level->ceilHeight = level->floorHeight;
-        }
+        }*/
 
         RefreshMap(true);
     }
     else if (IsKeyPressed(KEY_PERIOD))
     {   
-        if (level->mapArray[selectionLocation.mapArrayIndex] > DOOR_MASK)
-        {
-            level->doorLevitation += 1;
-
-            if (level->doorLevitation >= level->floorHeight / 4)
-            {
-                level->doorLevitation = 0;
-            }
-
-            RefreshMap(true);
-            
-            return;
-        }
-
-        // TODO: Do this properly.
         if (selectionLocation.entityType == Entity_Type_Wall) 
-        {
-            _currentWallHighlighted += 7;
-            if (_currentWallHighlighted >= TILE_DICTIONARY_SIZE)
+        { 
+            level->blocks[selectionLocation.mapArrayIndex].height++;
+
+            if (level->blocks[selectionLocation.mapArrayIndex].height > level->maxWallheight)
             {
-                _currentWallHighlighted -= (TILE_DICTIONARY_SIZE);
-                _currentWallHighlighted += 8;
+                level->blocks[selectionLocation.mapArrayIndex].height = 1;
             }
-          
-            level->mapArray[selectionLocation.mapArrayIndex] = _currentWallHighlighted;
+            _currentWallHeight = level->blocks[selectionLocation.mapArrayIndex].height;
             RefreshMap(true);
         }        
     }
 
     if (IsKeyDown(KEY_LEFT_SHIFT) && IsKeyPressed(KEY_COMMA))
     {
-        level->floorHeight--;
+      /*  level->floorHeight--;
         if (level->floorHeight < MIN_WALL_HEIGHT)
         {
             level->floorHeight = MAX_WALL_HEIGHT;
@@ -1762,64 +1491,47 @@ void UpdateGameplayScreen(void)
         if (level->ceilHeight < OUTSIDE_CEIL_VALUE)
         {
             level->ceilHeight = level->floorHeight;
-        }
+        }*/
 
         RefreshMap(true);
     }
     else if (IsKeyPressed(KEY_COMMA))
     {     
+        if (selectionLocation.entityType == Entity_Type_Wall){
+        level->blocks[selectionLocation.mapArrayIndex].height --;
 
-        if (level->mapArray[selectionLocation.mapArrayIndex] > DOOR_MASK)
+        if (level->blocks[selectionLocation.mapArrayIndex].height < 1)
         {
-            if (level->doorLevitation == 0)
-            {
-                level->doorLevitation = level->floorHeight / 4;
-            }
-            level->doorLevitation -= 1;
-
-            RefreshMap(true);
-
-            return;
+            level->blocks[selectionLocation.mapArrayIndex].height = level->maxWallheight;
         }
-        
-        if (selectionLocation.entityType == Entity_Type_Wall)
-        {
-            _currentWallHighlighted -= 7;
-            if (_currentWallHighlighted <= 7)
-            {
-                _currentWallHighlighted += (TILE_DICTIONARY_SIZE);
-                _currentWallHighlighted -= 8;
-            }
-
-            level->mapArray[selectionLocation.mapArrayIndex] = _currentWallHighlighted;
+            _currentWallHeight = level->blocks[selectionLocation.mapArrayIndex].height;
             RefreshMap(true);
         }
-        
     }
 
     if (IsKeyPressed(KEY_DELETE))
     {       
-        if (selectionLocation.entityType == Entity_Type_Wall)
-        {
-            if(level->mapArray[selectionLocation.mapArrayIndex] > DOOR_MASK)
-            { 
+        //if (selectionLocation.entityType == Entity_Type_Wall)
+        //{
+        //    if(level->mapArray[selectionLocation.mapArrayIndex] > DOOR_MASK)
+        //    { 
 
-                int doorIndex = DoesPositionHaveElement(selectionLocation.position);
-                if (doorIndex >= 0)
-                {                    
-                    RemoveElement(doorIndex);
-                }
-            }
+        //        int doorIndex = DoesPositionHaveElement(selectionLocation.position);
+        //        if (doorIndex >= 0)
+        //        {                    
+        //            RemoveElement(doorIndex);
+        //        }
+        //    }
 
-            level->mapArray[selectionLocation.mapArrayIndex] = 0;
-            RefreshMap(true);
-        }
-        else if (selectionLocation.entityType == Entity_Type_Item)
-        {
-            RemoveElement(selectionLocation.itemIndex);
-            RefreshMap(true);
-        }
-        selectionLocation.entityType = Entity_Type_None;
+        //    level->mapArray[selectionLocation.mapArrayIndex] = 0;
+        //    RefreshMap(true);
+        //}
+        //else if (selectionLocation.entityType == Entity_Type_Item)
+        //{
+        //    RemoveElement(selectionLocation.itemIndex);
+        //    RefreshMap(true);
+        //}
+        //selectionLocation.entityType = Entity_Type_None;
     }
 
     if (IsKeyPressed(KEY_RIGHT_BRACKET))
@@ -1868,14 +1580,14 @@ void UpdateGameplayScreen(void)
     }
     else if (currentEditorMode == Mode_Game)
     {
-        cameraMode = CAMERA_FIRST_PERSON;
+       /* cameraMode = CAMERA_FIRST_PERSON;
         camera.up = (Vector3){ 0.0f, 1.0f, 0.0f };
 
         int arrayPos = GetMapIndeFromPosition(camera.position);
         auto e = level->mapArray[arrayPos];
         uint8_t h = GetMapArrayHeightFromIndex(e, 0, level->stepSize);
         
-        camera.position.y = PLAYER_HEIGHT + (BLOCK_HEIGHT * (h));
+        camera.position.y = PLAYER_HEIGHT + (BLOCK_HEIGHT * (h));*/
     }
     else if (currentEditorMode == Mode_Scene)
     {
@@ -2011,11 +1723,11 @@ void DrawGameplayScreen(void)
 
     if (level)
     {    
-        uint8_t textureIndexRef = GetTetureIndex(_currentWallSelection);
-        uint8_t textureIndex = level->textureIndices[textureIndexRef];
-        Texture2D itemTexture = GetTextureFromElementType(_currentItemSelection);
-        DebugInfo d = { &camera,selectionLocation.mapArrayIndex, _floorHeight, level->ceilHeight == OUTSIDE_CEIL_VALUE, GetFPS(), level->stepSize, strcmp(levelPack, EMPTY) == 0 ? "None set": levelPack, MAX_ELEMENTS - _elementCount, wallTextures[textureIndex], itemTexture, _currentWallSelection > DOOR_MASK };
-        EUI_DrawDebugData(&d, drawHelpText);
+      //  uint8_t textureIndexRef = GetTetureIndex(_currentWallSelection);
+       // uint8_t textureIndex = level->textureIndices[textureIndexRef];
+       // Texture2D itemTexture = GetTextureFromElementType(_currentItemSelection);
+       // DebugInfo d = { &camera,selectionLocation.mapArrayIndex, _floorHeight, level->ceilHeight == OUTSIDE_CEIL_VALUE, GetFPS(), level->stepSize, strcmp(levelPack, EMPTY) == 0 ? "None set": levelPack, MAX_ELEMENTS - _elementCount, wallTextures[textureIndex], itemTexture, _currentWallSelection > DOOR_MASK };
+       // EUI_DrawDebugData(&d, drawHelpText);
     }
     
 
@@ -2032,38 +1744,7 @@ void DrawCrossHair(void)
 
 void DrawPlayerStartPosition(void)
 {
-    float size = 1.f;
-
-    int mapArrayindex = GetMapArrayIndex(level->playerStart[0], level->playerStart[1]);
-
-    uint8_t stepSize = GetMapArrayHeightFromIndex(level->mapArray[mapArrayindex], level->floorHeight, level->stepSize);
-
-    float h = 0.25f * stepSize;    
-    float x = level->playerStart[0] + 0.5;
-    float y = (size / 2) + h;
-    float z = level->playerStart[1] + 0.5;
-    Vector3 pos = (Vector3){ x - MAP_DIMENSION / 2, y ,z - MAP_DIMENSION / 2 };
-    
-    Vector3 source = { 0.f,-1.f,0.f };
-    Vector3 scale = { 0.01f, 0.01f,0.01f };
-    float rotationSource = DEGRESS_TO_BYTE_CONVERSION * (float)(level->playerStart[2]);
-    if (currentRenderMode == RenerMode_Textured)
-    {
-        if (IsModelValid(playerMarker))
-        {        
-            DrawModelEx(playerMarker, pos, source, rotationSource, scale, WHITE);
-            // DrawModel(playerMarker, pos, 0.005f, WHITE);
-        }
-    }
-    else if (currentRenderMode == RenerMode_Colored)
-    {
-        DrawCube(pos, 1.0f, 1, 1.0f, YELLOW);
-        DrawCubeWires(pos, 1.0f, 1.0f, 1.0f, WHITE);
-    }
-    else if (currentRenderMode == RenerMode_CollisionBlock)
-    {
-        DrawCubeWires(pos, 1.0f, 1.0f, 1.0f, YELLOW);
-    }
+   //}
 }
 
 void DrawElements(void)

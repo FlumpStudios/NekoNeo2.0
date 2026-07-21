@@ -9,7 +9,7 @@
 #define MAX_SAVE_FILE_NAME 50
 #define DOOR_TEXTURE_INDEX 15
 #define MAX_BACKGROUND_VALUE 3
-#define MAX_FLOOR_AND_CEIL_COLOUR 100
+#define MAX_CEIL_HEIGHT 50
 #define MAX_STEP_SIZE 10
 #define BASE_LEVEL_NAME "base"
 #define TILE_DICTIONARY_SIZE 64
@@ -41,14 +41,15 @@
 #define BLOCK_HEIGHT 0.25f
 #define BLOCK_WIDTH 1.0f
 #define DEBUG_LEVEL "level99"
-#define WALL_TEXTURE_COUNT 16
-#define ITEM_COUNT 13
+#define WALL_TEXTURE_COUNT 7
+#define ITEM_COUNT 64
 #define WEAPON_COUNT 5
 #define MAP_ARRAY_SIZE 4096
-#define MAX_ELEMENTS 128
+#define MAX_ELEMENTS 512
 #define WORKING_DIR ""
 #define MAX_CEIL_HEIGHT 30
 #define GUN_SCALE 4.0f
+#define DEFAULT_MAX_WALL_SIZE 10
 
 // The higest a step can be before a player can step on it
 #define PLAYER_STAIR_HEIGHT 0.3f

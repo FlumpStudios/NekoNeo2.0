@@ -41,7 +41,6 @@ struct BaseEntity {
     Texture texture;
 };
 
-// Each of these will contain their own unique elements soon
 typedef struct {
     struct BaseEntity;
     float drawHeight;
