@@ -1254,6 +1254,48 @@ void UpdateGameplayScreen(void)
 
     if (IsKeyPressed(KEY_ONE) || IsKeyPressed(KEY_TWO) || IsKeyPressed(KEY_THREE))
     {
+        if (selectionLocation.entityType == Entity_Type_Wall)
+        {
+            if (level->blocks->doorPosition > 0)
+            {
+                uint8_t x = 0;
+                uint8_t y = 0;
+
+                GetEntityPositionFromPosition(selectionLocation.position, &x, &y);
+
+                int index = DoesPositionHaveElement(selectionLocation.position);
+                bool incCounter = false;
+
+                if (index < 0)
+                {
+                    index = _elementCount;
+                    incCounter = true;
+                }
+
+                level->elements[_elementCount].position.x = x;
+                level->elements[_elementCount].position.y = y;
+
+
+                if (IsKeyPressed(KEY_ONE))
+                {
+                    level->elements[index].type = SFG_LEVEL_ELEMENT_LOCK0;
+                }
+                else if (IsKeyPressed(KEY_TWO))
+                {
+                    level->elements[index].type = SFG_LEVEL_ELEMENT_LOCK1;
+                }
+                else if (IsKeyPressed(KEY_THREE))
+                {
+                    level->elements[index].type = SFG_LEVEL_ELEMENT_LOCK2;
+                }
+                if (incCounter)
+                {
+                    _elementCount++;
+                }
+
+                RefreshMap(true);
+            }
+        }
     }
     
     if (IsKeyPressed(KEY_T))
