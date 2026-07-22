@@ -1249,14 +1249,23 @@ void UpdateGameplayScreen(void)
 
     if (IsKeyPressed(KEY_ZERO))
     {
+        if (selectionLocation.entityType == Entity_Type_Wall && level->blocks[selectionLocation.mapArrayIndex].doorPosition > 0)
+        {
+            int index = DoesPositionHaveElement(selectionLocation.position);
 
+            if (index >= 0)
+            {
+                RemoveElement(index);
+                RefreshMap(true);
+            }
+        }
     }
 
     if (IsKeyPressed(KEY_ONE) || IsKeyPressed(KEY_TWO) || IsKeyPressed(KEY_THREE))
     {
         if (selectionLocation.entityType == Entity_Type_Wall)
         {
-            if (level->blocks->doorPosition > 0)
+            if (level->blocks[selectionLocation.mapArrayIndex].doorPosition > 0)
             {
                 uint8_t x = 0;
                 uint8_t y = 0;
@@ -1300,7 +1309,24 @@ void UpdateGameplayScreen(void)
     
     if (IsKeyPressed(KEY_T))
     {
-
+        if (selectionLocation.entityType == Entity_Type_Wall)
+        {
+            if (level->blocks[selectionLocation.mapArrayIndex].doorPosition == 0)
+            {
+                level->blocks[selectionLocation.mapArrayIndex].doorPosition = 1;
+            }
+            else
+            {
+                level->blocks[selectionLocation.mapArrayIndex].doorPosition = 0;
+                int k = DoesPositionHaveElement(selectionLocation.position);
+                if (k >= 0)
+                {
+                    RemoveElement(k);
+                }
+            }
+            // _currentWallSelection = level->mapArray[selectionLocation.mapArrayIndex];
+            RefreshMap(true);
+        }
     }
 
     if (IsKeyPressed(KEY_P))
