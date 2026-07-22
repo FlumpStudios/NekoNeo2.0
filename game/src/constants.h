@@ -37,7 +37,7 @@
 #define BLOCK_HEIGHT 0.25f
 #define BLOCK_WIDTH 1.0f
 #define DEBUG_LEVEL "level99"
-#define ITEM_COUNT 64
+#define ITEM_COUNT 13
 #define WEAPON_COUNT 5
 #define MAP_ARRAY_SIZE 4096
 #define MAX_ELEMENTS 512
