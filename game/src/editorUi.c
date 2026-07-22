@@ -94,13 +94,7 @@ static void DrawCameraInfo(DebugInfo* debugInfo)
     y += SPACING;*/
 
     DrawText(TextFormat("- Map Array Index: %i", debugInfo->arrayCell), xpos, y, 10, TEXT_COLOUR);
-    y += SPACING;
-
-    DrawText(TextFormat("- Floor Height: %i", debugInfo->floorHeight), xpos, y, 10, TEXT_COLOUR);
-    y += SPACING;
-
-    DrawText(TextFormat("- Step Size: %i", debugInfo->stepSize), xpos, y, 10, TEXT_COLOUR);
-    y += SPACING;
+    y += SPACING;    
 
     DrawText(TextFormat("- Current Fps: %i", debugInfo->fps), xpos, y, 10, TEXT_COLOUR);
 
@@ -116,13 +110,7 @@ static void DrawCameraInfo(DebugInfo* debugInfo)
 
     DrawText("- Currently selected wall", xpos, y + 10, 10, TEXT_COLOUR);
 
-    DrawTexture(debugInfo->selectedWall, xpos + 140, y, WHITE);
-
-    if (debugInfo->isDoor)
-    {    
-        DrawText("Door", xpos + 145, y + 10, 10, BLACK);
-        DrawText("Door", xpos + 144, y + 10, 10, WHITE);
-    }
+    DrawTexture(debugInfo->selectedWall, xpos + 140, y, WHITE);    
     
     y += SPACING + 21;
 

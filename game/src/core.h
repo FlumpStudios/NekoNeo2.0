@@ -60,15 +60,11 @@ typedef struct {
 typedef struct {
     Camera* camera;
     int arrayCell;
-    uint8_t floorHeight;
-    bool isOutside;
     int fps;
-    uint8_t stepSize;
     char* levelPack;
     int remainingElements;
     Texture2D selectedWall;
-    Texture2D selectedItem;
-    bool isDoor;
+    Texture2D selectedItem;    
 } DebugInfo;
 
 typedef struct {

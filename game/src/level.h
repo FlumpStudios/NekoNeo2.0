@@ -74,7 +74,7 @@ typedef struct
     SFG_Element elements[MAX_ELEMENTS];
     uint8_t ceilingHeight;
     SFG_Vector playerStart;
-    uint8_t playerStartRotation;
+    float playerStartRotation;
     uint8_t floorType;
     uint8_t ceilingType;
     uint8_t maxWallheight;
@@ -87,7 +87,6 @@ typedef struct {
 } LevelHistory;
 
 #define SFG_NUMBER_OF_LEVELS 10
-
 
 uint8_t SFG_loadLevelFromFile(SFG_Level* buffer, const char* level)
 {
@@ -119,6 +118,15 @@ uint8_t SFG_loadLevelFromFile(SFG_Level* buffer, const char* level)
     fclose(file);
 
     return 1;
+}
+
+void SFG_resetBlock(SFG_Block* block)
+{
+    block->blockType = 0;
+    block->height = 0;
+    block->position.x = 0;
+    block->position.y = 0;
+    block->depth = 0;
 }
 
 void initLevel(SFG_Level* level)

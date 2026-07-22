@@ -1,4 +1,4 @@
-#include <assert.h>f
+#include <assert.h>
 #include "raylib.h"
 #include "engine.h"
 #include "level.h"
@@ -33,8 +33,8 @@ static uint16_t _elementCount;
 static uint8_t _floorHeight;
 static UiMode drawHelpText = 1;
 static int finishScreen = 0;
-static int _currentWallSelection = 8;
-static int _currentWallHighlighted = 8;
+static int _currentWallSelection = 1;
+static int _currentWallHighlighted = 1;
 static int _currentItemSelection = 1;
 static int _currentWallHeight = 1;
 static int cameraMode = CAMERA_FREE;
@@ -587,17 +587,10 @@ void SetSelectionBlockLocation(void)
             selectionLocation.mapArrayIndex = GetMapIndeFromPosition(selectionLocation.position);
             if (foundEntityType == Entity_Type_Wall)
             {
-                //_currentWallHighlighted = level->blocks[selectionLocation.mapArrayIndex].;
+                _currentWallHighlighted = level->blocks[selectionLocation.mapArrayIndex].blockType;
                 if (IsMouseButtonPressed(MOUSE_BUTTON_LEFT))
                 {
-                    if (_currentWallHighlighted > DOOR_MASK)
-                    {
-                        _currentWallSelection = (_currentWallHighlighted + 7) & ~DOOR_MASK;
-                    }
-                    else
-                    {                    
-                        _currentWallSelection = _currentWallHighlighted;
-                    }
+                    _currentWallSelection = _currentWallHighlighted;                    
                 }
             }
         }
@@ -817,7 +810,7 @@ void InitWalls(bool saveOnComplete)
         {
             // uint8_t v = level->mapArray[i];
             uint8_t height = level->blocks[i].height;
-            uint8_t textureIndex = 1;
+            uint8_t textureIndex = level->blocks[i].blockType;
 
             for (uint8_t k = 0; k < height; k++)
             {
@@ -848,7 +841,7 @@ void InitWalls(bool saveOnComplete)
                 else
                 {
                     mapBlocks[_blockCount].position = (Vector3){ x + 0.5f, (k * BLOCK_HEIGHT) + drawHeight / 2, z + 0.5f };
-                    mapBlocks[_blockCount].texture = wallTextures[0];
+                    mapBlocks[_blockCount].texture = wallTextures[level->blocks[i].blockType];
                 }
 
                 mapBlocks[_blockCount].drawHeight = drawHeight;
@@ -922,7 +915,7 @@ void InitGameplayScreen(void)
 {
 
 #ifdef DEBUG
-    alphaDiscard = LoadShader(NULL, "C:/Projects/NekoNeo/game/src/shaders/alphaDiscard.frag");
+    alphaDiscard = LoadShader(NULL, "game/src/shaders/alphaDiscard.frag");
     
     level = MemAlloc(sizeof(SFG_Level));
 
@@ -954,34 +947,34 @@ void InitGameplayScreen(void)
     for (uint8_t i = 0; i < WALL_TEXTURE_COUNT; i++)
     {
         char fullPath[256];
-        sprintf(fullPath, "C:\\Projects\\NekoEngine\\GameData\\WallTextures\\o_%u.png", i);
+        sprintf(fullPath, "GameData/WallTextures/o_%u.png", i);
         wallTextures[i] = LoadTexture(fullPath);
     }
 
     for (uint8_t i = 0; i < ITEM_COUNT; i++)
     {
         char fullPath[256];
-        sprintf(fullPath, "C:\\Projects\\NekoEngine\\GameData\\Items\\o_%u.png", i);
+        sprintf(fullPath, "GameData/Items/o_%u.png", i);
         itemTextures[i] = LoadTexture(fullPath);
     }
 
     for (uint8_t i = 0; i < WEAPON_COUNT; i++)
     {
         char fullPath[256];
-        sprintf(fullPath, "C:\\Projects\\NekoEngine\\GameData\\Weapons\\o_%u.png", i);
+        sprintf(fullPath, "GameData/Weapons/o_%u.png", i);
         weaponsTextures[i] = LoadTexture(fullPath);
     }
 
-    spiderEnemy = LoadTexture("C:/Projects/NekoEngine/GameData/Enemies/o_0.png");
-    destroyerEnemy = LoadTexture("C:/Projects/NekoEngine/GameData/Enemies/o_3.png");
-    warriorEnemy = LoadTexture("C:/Projects/NekoEngine/GameData/Enemies/o_6.png");
-    plasmaBotEnemy = LoadTexture("C:/Projects/NekoEngine/GameData/Enemies/o_9.png");
-    enderEnemy = LoadTexture("C:/Projects/NekoEngine/GameData/Enemies/o_12.png");
-    turretEnemy = LoadTexture("C:/Projects/NekoEngine/GameData/Enemies/o_15.png");
-    exploderEnemy = LoadTexture("C:/Projects/NekoEngine/GameData/Enemies/o_18.png");
-    blocker = LoadTexture("C:/Projects/NekoEngine/GameData/assets/Blocker.png");
-    lock = LoadTexture("C:/Projects/NekoEngine/GameData/assets/lock.png");
-    playerMarker = LoadModel("C:/Projects/NekoEngine/GameData/assets/PlayerStartPosition.obj");
+    spiderEnemy = LoadTexture("GameData/Enemies/o_0.png");
+    destroyerEnemy = LoadTexture("GameData/Enemies/o_3.png");
+    warriorEnemy = LoadTexture("GameData/Enemies/o_6.png");
+    plasmaBotEnemy = LoadTexture("GameData/Enemies/o_9.png");
+    enderEnemy = LoadTexture("GameData/Enemies/o_12.png");
+    turretEnemy = LoadTexture("GameData/Enemies/o_15.png");
+    exploderEnemy = LoadTexture("GameData/Enemies/o_18.png");
+    blocker = LoadTexture("GameData/assets/Blocker.png");
+    lock = LoadTexture("GameData/assets/lock.png");
+    playerMarker = LoadModel("GameData/assets/PlayerStartPosition.obj");
 
 #else
     alphaDiscard = LoadShader(NULL, "data/alphaDiscard.frag");
@@ -1089,80 +1082,49 @@ void InitGameplayScreen(void)
 
     _levelReady = true;
 }
-  
-void UpdateFloorHeight(void)
-{
-    /*auto e = level->mapArray[selectionLocation.mapArrayIndex];
-    uint8_t h = GetMapArrayHeightFromIndex(e, e == 0 ? 1 : level->floorHeight, level->stepSize);
-    _floorHeight = h;*/
-}
 
 void ScrollUpEntities(void)
 {
-   // if (selectionLocation.entityType == Entity_Type_Wall)
-   // {
-        //bool isDoor = level->mapArray[selectionLocation.mapArrayIndex] > DOOR_MASK;
+    if (selectionLocation.entityType == Entity_Type_Wall)
+    {
+        _currentWallHighlighted--;
 
-        //_currentWallHighlighted--;
-        //
+        if (_currentWallHighlighted < 1)
+        {
+            _currentWallHighlighted = WALL_TEXTURE_COUNT;
+        }
 
-        //if (isDoor)
-        //{
-        //    if ((_currentWallHighlighted & ~DOOR_MASK) < 1)
-        //    {
-        //        _currentWallHighlighted = 7 | DOOR_MASK;
-        //    }
-        //    _currentWallSelection = (_currentWallHighlighted & ~DOOR_MASK) + 7;
-        //}
-        //else
-        //{
-        //    if ((_currentWallHighlighted) % 7 == 0)
-        //    {
-        //        _currentWallHighlighted += 7;
-        //    }
-        //    _currentWallSelection = _currentWallHighlighted;
-        //}
+        _currentWallSelection = _currentWallHighlighted;
+        
 
-        //level->mapArray[selectionLocation.mapArrayIndex] = _currentWallHighlighted;
-        //RefreshMap(true);
-    //}
-    //else if (selectionLocation.entityType == Entity_Type_Item)
-    //{
-    //    uint8_t t = _currentItemSelection;
-    //    uint8_t nextElement = GetPreviousElementType(t);
-    //    level->elements[selectionLocation.itemIndex].type = nextElement;
-    //    _currentItemSelection = nextElement;
-    //    RefreshMap(true);
-    //}
+        level->blocks[selectionLocation.mapArrayIndex].blockType = _currentWallHighlighted;
+        RefreshMap(true);
+    }
+    else if (selectionLocation.entityType == Entity_Type_Item)
+    {
+        uint8_t t = _currentItemSelection;
+        uint8_t nextElement = GetPreviousElementType(t);
+        level->elements[selectionLocation.itemIndex].type = nextElement;
+        _currentItemSelection = nextElement;
+        RefreshMap(true);
+    }
 }
 
 void ScrollDownEntities(void)
 {
-   /* if (selectionLocation.entityType == Entity_Type_Wall)
+    if (selectionLocation.entityType == Entity_Type_Wall)
     {
-        bool isDoor = level->mapArray[selectionLocation.mapArrayIndex] > DOOR_MASK;
+        _currentWallHighlighted++;
 
-        _currentWallHighlighted ++;
-        
-
-        if (isDoor)
+        if(_currentWallHighlighted > WALL_TEXTURE_COUNT)
         {
-            if ((_currentWallHighlighted & ~DOOR_MASK) > 7)
-            {
-                _currentWallHighlighted = 1 | DOOR_MASK;
-            }
-            _currentWallSelection = (_currentWallHighlighted & ~DOOR_MASK) + 7;
-        }
-        else
-        {
-            if ((_currentWallHighlighted - 1) % 7 == 0)
-            {
-                _currentWallHighlighted -= 7;
-            }
-            _currentWallSelection = _currentWallHighlighted;
-        }
-        level->mapArray[selectionLocation.mapArrayIndex] = _currentWallHighlighted;         
+            _currentWallHighlighted = 1;
+        }   
 
+        _currentWallSelection = _currentWallHighlighted;
+
+
+        level->blocks[selectionLocation.mapArrayIndex].blockType = _currentWallHighlighted;
         RefreshMap(true);
     }
     else if (selectionLocation.entityType == Entity_Type_Item)
@@ -1172,18 +1134,7 @@ void ScrollDownEntities(void)
         level->elements[selectionLocation.itemIndex].type = nextElement;
         _currentItemSelection = nextElement;
         RefreshMap(true);
-    }*/
-}
-
-int GetDoorIndexFromwall(int i)
-{
-    int j = 0;
-    while (i > 0)
-    {
-        i -= 7;
-        j++;
     }
-    return (j - 1) * 7;
 }
 
 // Gameplay Screen Update logic
@@ -1243,13 +1194,24 @@ void UpdateGameplayScreen(void)
             RefreshMap(false);            
         }
     }
+
+    if (IsKeyDown(KEY_LEFT_CONTROL) && IsKeyPressed(KEY_Y))
+    {
+        SFG_Level a = _levelHistory.history[_levelHistory.currentIndex + 1];
+        if (a.maxWallheight > 0)
+        {
+            _levelHistory.currentIndex++;
+            memcpy(level, &_levelHistory.history[_levelHistory.currentIndex], sizeof(SFG_Level));
+            RefreshMap(false);
+        }
+    }
     
 
     static bool isPlayerRotatingRight = false;
     if (IsKeyDown(KEY_F6))
     {
         level->playerStartRotation++;
-        if (level->playerStartRotation >= 254)
+        if (level->playerStartRotation >= 360)
         {
             level->playerStartRotation = 0;
         }
@@ -1271,7 +1233,7 @@ void UpdateGameplayScreen(void)
         level->playerStartRotation--;
         if (level->playerStartRotation <= 0)
         {
-            level->playerStartRotation = 255;
+            level->playerStartRotation = 360;
         }
         isPlayerRotatingLeft = true;
     }
@@ -1373,13 +1335,6 @@ void UpdateGameplayScreen(void)
         }
     }
 
-    if (IsKeyPressed(KEY_F2))
-    {
-        // Disabled for now as getting messed up doors
-        // level->ceilHeight = (level->ceilHeight == OUTSIDE_CEIL_VALUE ? level->ceilHeight = level->floorHeight : OUTSIDE_CEIL_VALUE);
-        // RefreshMap(true);
-    }
-
     if (IsKeyPressed(KEY_F11) ||
         ((IsKeyDown(KEY_LEFT_ALT) || IsKeyDown(KEY_ENTER)) && IsKeyPressed(KEY_ENTER))
         )
@@ -1449,20 +1404,6 @@ void UpdateGameplayScreen(void)
     
     if (IsKeyDown(KEY_LEFT_SHIFT) && IsKeyPressed(KEY_PERIOD))
     {
-       
-      /*  
-       
-      level->floorHeight++;
-        if (level->floorHeight > MAX_WALL_HEIGHT)
-        {
-            level->floorHeight = MIN_WALL_HEIGHT;
-        }
-
-        if (level->ceilHeight < OUTSIDE_CEIL_VALUE)
-        {
-            level->ceilHeight = level->floorHeight;
-        }*/
-
         RefreshMap(true);
     }
     else if (IsKeyPressed(KEY_PERIOD))
@@ -1511,27 +1452,18 @@ void UpdateGameplayScreen(void)
 
     if (IsKeyPressed(KEY_DELETE))
     {       
-        //if (selectionLocation.entityType == Entity_Type_Wall)
-        //{
-        //    if(level->mapArray[selectionLocation.mapArrayIndex] > DOOR_MASK)
-        //    { 
+        if (selectionLocation.entityType == Entity_Type_Wall)
+        {            
+            SFG_resetBlock(&level->blocks[selectionLocation.mapArrayIndex]);
 
-        //        int doorIndex = DoesPositionHaveElement(selectionLocation.position);
-        //        if (doorIndex >= 0)
-        //        {                    
-        //            RemoveElement(doorIndex);
-        //        }
-        //    }
-
-        //    level->mapArray[selectionLocation.mapArrayIndex] = 0;
-        //    RefreshMap(true);
-        //}
-        //else if (selectionLocation.entityType == Entity_Type_Item)
-        //{
-        //    RemoveElement(selectionLocation.itemIndex);
-        //    RefreshMap(true);
-        //}
-        //selectionLocation.entityType = Entity_Type_None;
+            RefreshMap(true);
+        }
+        else if (selectionLocation.entityType == Entity_Type_Item)
+        {
+            RemoveElement(selectionLocation.itemIndex);
+            RefreshMap(true);
+        }
+        selectionLocation.entityType = Entity_Type_None;
     }
 
     if (IsKeyPressed(KEY_RIGHT_BRACKET))
@@ -1594,9 +1526,6 @@ void UpdateGameplayScreen(void)
         cameraMode = CAMERA_ORBITAL;
         camera.up = (Vector3){ 0.0f, 1.0f, 0.0f };
     }
-
-
-    UpdateFloorHeight();
 
     int wheelMove = GetMouseWheelMove();
 
@@ -1723,11 +1652,9 @@ void DrawGameplayScreen(void)
 
     if (level)
     {    
-      //  uint8_t textureIndexRef = GetTetureIndex(_currentWallSelection);
-       // uint8_t textureIndex = level->textureIndices[textureIndexRef];
-       // Texture2D itemTexture = GetTextureFromElementType(_currentItemSelection);
-       // DebugInfo d = { &camera,selectionLocation.mapArrayIndex, _floorHeight, level->ceilHeight == OUTSIDE_CEIL_VALUE, GetFPS(), level->stepSize, strcmp(levelPack, EMPTY) == 0 ? "None set": levelPack, MAX_ELEMENTS - _elementCount, wallTextures[textureIndex], itemTexture, _currentWallSelection > DOOR_MASK };
-       // EUI_DrawDebugData(&d, drawHelpText);
+       Texture2D itemTexture = wallTextures[_currentWallSelection];
+       DebugInfo d = { &camera,selectionLocation.mapArrayIndex, GetFPS(), strcmp(levelPack, EMPTY) == 0 ? "None set": levelPack, MAX_ELEMENTS - _elementCount, wallTextures[_currentWallSelection], itemTexture};
+       EUI_DrawDebugData(&d, drawHelpText);
     }
     
 
@@ -1744,7 +1671,34 @@ void DrawCrossHair(void)
 
 void DrawPlayerStartPosition(void)
 {
-   //}
+    float size = 1.f;
+
+    int mapArrayindex = GetMapArrayIndex(level->playerStart.x, level->playerStart.y);
+
+    uint8_t stepSize = level->blocks[mapArrayindex].height;
+
+    float h = 0.25f * stepSize;
+    float x = level->playerStart.x + 0.5;
+    float y = (size / 2) + h;
+    float z = level->playerStart.y + 0.5;
+    Vector3 pos = (Vector3){ x - MAP_DIMENSION / 2, y ,z - MAP_DIMENSION / 2 };
+
+    Vector3 source = { 0.f,-1.f,0.f };
+    Vector3 scale = { 0.01f, 0.01f,0.01f };
+    float rotationSource = level->playerStartRotation;
+    if (currentRenderMode == RenerMode_Textured)
+    {   
+        DrawModelEx(playerMarker, pos, source, rotationSource, scale, WHITE);         
+    }
+    else if (currentRenderMode == RenerMode_Colored)
+    {
+        DrawCube(pos, 1.0f, 1, 1.0f, YELLOW);
+        DrawCubeWires(pos, 1.0f, 1.0f, 1.0f, WHITE);
+    }
+    else if (currentRenderMode == RenerMode_CollisionBlock)
+    {
+        DrawCubeWires(pos, 1.0f, 1.0f, 1.0f, YELLOW);
+    }
 }
 
 void DrawElements(void)

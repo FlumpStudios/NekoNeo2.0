@@ -4,38 +4,6 @@
 #include <math.h>
 
 
-uint8_t GetTetureIndex(uint8_t i)
-{
-    uint8_t r = 0;
-    switch (i)
-    {
-    case 1 | DOOR_MASK:
-        return 0;
-        
-    case 2 | DOOR_MASK:
-        return 1;
-        
-    case 3 | DOOR_MASK:
-        return 2;
-
-    case 4 | DOOR_MASK:
-        return 3;
-
-    case 5 | DOOR_MASK:
-        return 4;
-
-    case 6 | DOOR_MASK:
-        return 5;
-
-    case 7 | DOOR_MASK:
-        return 6;        
-    }
-
-
-    uint8_t offset = i - 8;
-    return (offset % 7);
-}
-
 void GetEntityPositionFromPosition(Vector3 location, uint8_t* col, uint8_t* row)
 {
     *col = (int)(floor(location.x)) + (MAP_DIMENSION / 2);

@@ -8,7 +8,7 @@
 #endif
 
 #ifdef DEBUG
-#define FONT_LOCATION "C:\\Projects\\NekoNeo\\game\\src\\fonts\\mecha.png"
+#define FONT_LOCATION "game/src/fonts/mecha.png"
 #else
 #define FONT_LOCATION "fonts\\mecha.png"
 #endif // DEBUG
