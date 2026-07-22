@@ -944,7 +944,7 @@ void InitGameplayScreen(void)
         }
     }
 
-    for (uint8_t i = 0; i < WALL_TEXTURE_COUNT; i++)
+    for (uint8_t i = 1; i <= WALL_TEXTURE_COUNT; i++)
     {
         char fullPath[256];
         sprintf(fullPath, "GameData/WallTextures/o_%u.png", i);
@@ -1720,7 +1720,7 @@ void DrawGameplayScreen(void)
 
     if (level)
     {    
-       Texture2D itemTexture = wallTextures[_currentWallSelection];
+       Texture2D itemTexture = GetTextureFromElementType(_currentItemSelection);
        DebugInfo d = { &camera,selectionLocation.mapArrayIndex, GetFPS(), strcmp(levelPack, EMPTY) == 0 ? "None set": levelPack, MAX_ELEMENTS - _elementCount, wallTextures[_currentWallSelection], itemTexture};
        EUI_DrawDebugData(&d, drawHelpText);
     }
