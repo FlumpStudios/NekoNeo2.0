@@ -43,7 +43,7 @@ uint8_t GetMapArrayHeightFromIndex(uint8_t index, uint8_t baseValue, uint8_t ste
     }
     
     // Doors and full walls
-    if(index < 15 || index > DOOR_MASK)
+    if(index < 15)
     {
         return baseValue;
     }
