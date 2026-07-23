@@ -29,7 +29,7 @@
 #define WINDOW_HEIGHT 720
 #define TRANS_RED        CLITERAL(Color){ 230, 41, 55, 100 } 
 #define TRANS_BLUE       CLITERAL(Color){ 135, 206, 235, 100 }
-#define WALL_TEXTURE_COUNT 15
+#define WALL_TEXTURE_COUNT 16
 #define PROJECT_NAME "NekoNeo"
 #define MAP_DIMENSION 64
 #define PLAYER_HEIGHT 0.65f

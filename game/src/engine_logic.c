@@ -831,12 +831,22 @@ void InitWalls(bool saveOnComplete)
                 float y = 1.0f;
                 float z = (1.0f * row) - MAP_DIMENSION / 2;
 
-                bool isDoor = level->blocks->doorPosition > 0;
+                bool isDoor = level->blocks[i].doorPosition > 0;
 
                 mapBlocks[_blockCount].isDoor = isDoor;
                 if (isDoor)
                 {
-                    
+                    if (k == (level->blocks[i].doorPosition - 1) * 4)
+                    {
+                        mapBlocks[_blockCount].position = (Vector3){ x + 0.5f, (k * BLOCK_HEIGHT) + drawHeight / 2, z + 0.5f };
+                        mapBlocks[_blockCount].texture = wallTextures[DOOR_TEXTURE_INDEX];
+
+                    }
+                    else
+                    {
+                        mapBlocks[_blockCount].position = (Vector3){ x + 0.5f, (k * BLOCK_HEIGHT) + drawHeight / 2, z + 0.5f };
+                        mapBlocks[_blockCount].texture = wallTextures[textureIndex];
+                    }
                 }
                 else
                 {
@@ -1306,7 +1316,7 @@ void UpdateGameplayScreen(void)
             }
         }
     }
-    
+
     if (IsKeyPressed(KEY_T))
     {
         if (selectionLocation.entityType == Entity_Type_Wall)
@@ -1472,7 +1482,15 @@ void UpdateGameplayScreen(void)
     
     if (IsKeyDown(KEY_LEFT_SHIFT) && IsKeyPressed(KEY_PERIOD))
     {
-        RefreshMap(true);
+        if (selectionLocation.entityType == Entity_Type_Wall)
+        {
+            if (level->blocks[selectionLocation.mapArrayIndex].doorPosition > 0)
+            {
+                level->blocks[selectionLocation.mapArrayIndex].doorPosition++;
+            }
+            // _currentWallSelection = level->mapArray[selectionLocation.mapArrayIndex];
+            RefreshMap(true);
+        }
     }
     else if (IsKeyPressed(KEY_PERIOD))
     {   
@@ -1491,18 +1509,15 @@ void UpdateGameplayScreen(void)
 
     if (IsKeyDown(KEY_LEFT_SHIFT) && IsKeyPressed(KEY_COMMA))
     {
-      /*  level->floorHeight--;
-        if (level->floorHeight < MIN_WALL_HEIGHT)
+        if (selectionLocation.entityType == Entity_Type_Wall)
         {
-            level->floorHeight = MAX_WALL_HEIGHT;
+            if (level->blocks[selectionLocation.mapArrayIndex].doorPosition > 1)
+            {
+                level->blocks[selectionLocation.mapArrayIndex].doorPosition--;
+            }
+            // _currentWallSelection = level->mapArray[selectionLocation.mapArrayIndex];
+            RefreshMap(true);
         }
-
-        if (level->ceilHeight < OUTSIDE_CEIL_VALUE)
-        {
-            level->ceilHeight = level->floorHeight;
-        }*/
-
-        RefreshMap(true);
     }
     else if (IsKeyPressed(KEY_COMMA))
     {     
@@ -1561,7 +1576,7 @@ void UpdateGameplayScreen(void)
         switch (currentRenderMode)
         {
 		case 0:
-			EUI_DrawStatusUpdate("Render Mode: Normal", WHITE);
+			EUI_DrawStatusUpdate("Render Mode: Textured", WHITE);
 			break;
 		case 1:                
 			EUI_DrawStatusUpdate("Render Mode: Wireframe", WHITE);
