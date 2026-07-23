@@ -836,15 +836,14 @@ void InitWalls(bool saveOnComplete)
                 mapBlocks[_blockCount].isDoor = isDoor;
                 if (isDoor)
                 {
+                    mapBlocks[_blockCount].position = (Vector3){ x + 0.5f, (k * BLOCK_HEIGHT) + drawHeight / 2, z + 0.5f };
                     if (k == (level->blocks[i].doorPosition - 1) * 4)
                     {
-                        mapBlocks[_blockCount].position = (Vector3){ x + 0.5f, (k * BLOCK_HEIGHT) + drawHeight / 2, z + 0.5f };
                         mapBlocks[_blockCount].texture = wallTextures[DOOR_TEXTURE_INDEX];
 
                     }
                     else
                     {
-                        mapBlocks[_blockCount].position = (Vector3){ x + 0.5f, (k * BLOCK_HEIGHT) + drawHeight / 2, z + 0.5f };
                         mapBlocks[_blockCount].texture = wallTextures[textureIndex];
                     }
                 }
@@ -1323,7 +1322,14 @@ void UpdateGameplayScreen(void)
         {
             if (level->blocks[selectionLocation.mapArrayIndex].doorPosition == 0)
             {
-                level->blocks[selectionLocation.mapArrayIndex].doorPosition = 1;
+                if(level->blocks[selectionLocation.mapArrayIndex].height < 4)
+                {
+                    EUI_DrawStatusUpdate("Block height must be set to at least 4 to create a door", WHITE);
+                }
+                else
+                {
+                    level->blocks[selectionLocation.mapArrayIndex].doorPosition = 1;
+                }
             }
             else
             {
@@ -1486,10 +1492,14 @@ void UpdateGameplayScreen(void)
         {
             if (level->blocks[selectionLocation.mapArrayIndex].doorPosition > 0)
             {
-                level->blocks[selectionLocation.mapArrayIndex].doorPosition++;
+                uint8_t s = level->blocks[selectionLocation.mapArrayIndex].height / 4;
+                if ((level->blocks[selectionLocation.mapArrayIndex].doorPosition) < s)
+                {
+                    level->blocks[selectionLocation.mapArrayIndex].doorPosition++;
+                    RefreshMap(true);
+                }
             }
             // _currentWallSelection = level->mapArray[selectionLocation.mapArrayIndex];
-            RefreshMap(true);
         }
     }
     else if (IsKeyPressed(KEY_PERIOD))
@@ -1521,15 +1531,28 @@ void UpdateGameplayScreen(void)
     }
     else if (IsKeyPressed(KEY_COMMA))
     {     
-        if (selectionLocation.entityType == Entity_Type_Wall){
-        level->blocks[selectionLocation.mapArrayIndex].height --;
-
-        if (level->blocks[selectionLocation.mapArrayIndex].height < 1)
+        if (selectionLocation.entityType == Entity_Type_Wall)
         {
-            level->blocks[selectionLocation.mapArrayIndex].height = level->maxWallheight;
-        }
-            _currentWallHeight = level->blocks[selectionLocation.mapArrayIndex].height;
-            RefreshMap(true);
+            if (level->blocks[selectionLocation.mapArrayIndex].height < 5 && level->blocks[selectionLocation.mapArrayIndex].doorPosition > 0)
+            {
+                EUI_DrawStatusUpdate("Doors must have a height value of 4 or higher", WHITE);
+            }
+            else
+            {
+                level->blocks[selectionLocation.mapArrayIndex].height --;
+
+                if((level->blocks[selectionLocation.mapArrayIndex].doorPosition * 4) > level->blocks[selectionLocation.mapArrayIndex].height)
+                {
+                    level->blocks[selectionLocation.mapArrayIndex].doorPosition--;
+                }
+
+                if (level->blocks[selectionLocation.mapArrayIndex].height < 1)
+                {
+                    level->blocks[selectionLocation.mapArrayIndex].height = level->maxWallheight;
+                }
+                _currentWallHeight = level->blocks[selectionLocation.mapArrayIndex].height;
+                RefreshMap(true);
+            }
         }
     }
 

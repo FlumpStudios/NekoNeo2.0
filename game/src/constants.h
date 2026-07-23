@@ -43,7 +43,7 @@
 #define WORKING_DIR ""
 #define MAX_CEIL_HEIGHT 30
 #define GUN_SCALE 4.0f
-#define DEFAULT_MAX_WALL_SIZE 10
+#define DEFAULT_MAX_WALL_SIZE 36
 
 // The higest a step can be before a player can step on it
 #define PLAYER_STAIR_HEIGHT 0.3f
